@@ -110,6 +110,8 @@ public:
     int getvacc() const {
         return m_vaccines;
     }
+    
+    // POTENTIALLY, SOMETHING ABOUT ESCAPING
 private:
     int m_landmines;
     int m_flames;

@@ -14,6 +14,7 @@ Penelope::Penelope(StudentWorld *world, double startX, double startY)
 
 void Penelope::doSomething()
 {
+    StudentWorld* myWorld = getWorld();
     if (!stillAlive())
         return;
     if (isInfected())
@@ -26,22 +27,42 @@ void Penelope::doSomething()
         }
     }
     int ch;
-    if (getWorld()->getKey(ch))
+    
+    if (myWorld->getKey(ch))
     {
+        double currX = getX();
+        double currY = getY();
+        
         switch (ch)
         {
-            case KEY_PRESS_LEFT:
-                //move left
+            case KEY_PRESS_LEFT: {
+                // move left
+                setDirection(left);
+                if (myWorld->canMove(this, currX-4, currY))
+                    moveTo(currX-4, currY);
                 break;
-            case KEY_PRESS_RIGHT:
+            }
+            case KEY_PRESS_RIGHT: {
                 //move right
+                setDirection(right);
+                if (myWorld->canMove(this, currX+4, currY))
+                    moveTo(currX+4, currY);
                 break;
-            case KEY_PRESS_DOWN:
-                // move
+            }
+            case KEY_PRESS_DOWN: {
+                // move down
+                setDirection(down);
+                if (myWorld->canMove(this, currX, currY-4))
+                    moveTo(currX, currY-4);
                 break;
-            case KEY_PRESS_UP:
-                // move
+            }
+            case KEY_PRESS_UP: {
+                // move up
+                setDirection(up);
+                if (myWorld->canMove(this, currX, currY+4))
+                    moveTo(currX, currY+4);
                 break;
+            }
         }
     }
 }
