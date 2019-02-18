@@ -17,15 +17,28 @@ public:
     virtual int init();
     virtual int move();
     virtual void cleanUp();
-
-    bool determineOverlap(double x, double y, const Actor* other) const;
+    
+    bool allEscaped() const {
+        return (m_pplLeft == 0);
+    }
+    void decPeople() {
+        m_pplLeft--;
+    }
+    void nowPassed() {
+        m_passed = true;
+    }
+    bool determineOverlap(const Actor* act1, const Actor* act2) const;
     bool determineBlocking(double x, double y, const Actor* other) const;
     bool canMove(const Actor* requester, double x, double y) const;
+    bool citizenEscapes(const Actor* exit);
+    bool overlapPenelope(const Actor* requester);
 private:
     std::list<Actor*> m_actors;
     Penelope* m_player;
     
-    // KEEP TRACK OF CITIZENS
+    // KEEP TRACK OF CITIZENS, LEVEL
+    int m_pplLeft;
+    bool m_passed;
 };
 
 #endif // STUDENTWORLD_H_

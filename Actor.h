@@ -33,7 +33,7 @@ public:
    
     //virtual bool getDestroyed() = 0;
     virtual bool canBlock() const = 0;
-    virtual bool canOverlap() const = 0;
+    virtual bool canBeSteppedOn() const = 0;
     virtual bool canMove() const = 0;
     virtual bool notZombie() const = 0;
 protected:
@@ -56,12 +56,13 @@ public:
     virtual bool canBlock() const {
         return true;
     }
-    virtual bool canOverlap() const {
-        return true;
+    virtual bool canBeSteppedOn() const {
+        return false;
     }
     virtual bool canMove() const {
         return true;
     }
+    bool canMoveTo(double destX, double destY);
 };
 
 class Human: public Movers
@@ -89,6 +90,9 @@ public:
     }
     bool isZombieNow() const {
         return (m_infectLvl >= 500);
+    }
+    int getInfectLvl() const {
+        return m_infectLvl;
     }
 private:
     bool m_infected;
@@ -128,8 +132,29 @@ public:
     virtual bool canBlock() const {
         return true;
     }
-    virtual bool canOverlap() const {
+    virtual bool canBeSteppedOn() const {
         return false;
+    }
+    virtual bool canMove() const {
+        return false;
+    }
+    virtual bool notZombie() const {
+        return true;
+    }
+};
+
+class Exit: public Actor
+{
+public:
+    Exit(StudentWorld *world, double startX, double startY)
+    : Actor(world, 1, IID_EXIT, startX, startY, right, 1)
+    {}
+    virtual void doSomething();
+    virtual bool canBlock() const {
+        return true;
+    }
+    virtual bool canBeSteppedOn() const {
+        return true;
     }
     virtual bool canMove() const {
         return false;
