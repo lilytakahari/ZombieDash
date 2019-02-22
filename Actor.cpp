@@ -4,7 +4,8 @@
 // Students:  Add code to this file, Actor.h, StudentWorld.h, and StudentWorld.cpp
 #include "GameConstants.h"
 
-bool Movers::canMoveTo(double destX, double destY) {
+bool Movers::canMoveTo(double destX, double destY)
+{
     if (getWorld()->canMove(this, destX, destY)) {
         moveTo(destX, destY);
         return true;
@@ -19,6 +20,20 @@ Penelope::Penelope(StudentWorld *world, double startX, double startY)
     m_landmines = 0;
     m_flames = 0;
     m_vaccines = 0;
+}
+void Penelope::awardGoodie(char type)
+{
+    switch (type) {
+        case 'f':
+            m_flames += 5;
+            break;
+        case 'v':
+            m_vaccines += 1;
+            break;
+        case 'l':
+            m_landmines += 2;
+            break;
+    }
 }
 
 void Penelope::doSomething()
@@ -71,7 +86,8 @@ void Penelope::doSomething()
     }
 }
 
-void Exit::doSomething() {
+void Exit::doSomething()
+{
     StudentWorld* myWorld = getWorld();
     if (myWorld->citizenEscapes(this))
     {
@@ -80,4 +96,43 @@ void Exit::doSomething() {
     }
     if (myWorld->overlapPenelope(this) && myWorld->allEscaped())
         myWorld->nowPassed();
+}
+
+void Goodie::doSomething()
+{
+    if (!stillAlive())
+        return;
+    StudentWorld* myWorld = getWorld();
+    if (myWorld->overlapPenelope(this))
+    {
+        myWorld->increaseScore(50);
+        myWorld->playSound(SOUND_GOT_GOODIE);
+        setDead();
+        tellWorld();
+    }
+}
+
+void GasCanGoodie::tellWorld() {
+    getWorld()->awardGoodie('f');
+}
+void LandmineGoodie::tellWorld() {
+    getWorld()->awardGoodie('l');
+}
+void VaccineGoodie::tellWorld() {
+    getWorld()->awardGoodie('v');
+}
+
+void TempDmgers::doSomething() {
+    if (!stillAlive())
+        return;
+    damage();
+    decHealth();
+}
+
+void Vomit::damage() {
+    getWorld()->infectActors(this);
+}
+
+void Flame::damage() {
+    getWorld()->killActors(this);
 }

@@ -74,13 +74,13 @@ int StudentWorld::init()
                     case Level::pit:
                         break;
                     case Level::vaccine_goodie:
-                        
+                        toAdd = new VaccineGoodie(this, screenX, screenY);
                         break;
                     case Level::gas_can_goodie:
-                        
+                        toAdd = new GasCanGoodie(this, screenX, screenY);
                         break;
                     case Level::landmine_goodie:
-                        
+                        toAdd = new LandmineGoodie(this, screenX, screenY);
                         break;
                     case Level::citizen:
                         //m_pplLeft++;
@@ -162,7 +162,8 @@ void StudentWorld::cleanUp()
     m_player = nullptr;
 }
 
-bool StudentWorld::determineOverlap(const Actor* act1, const Actor* act2) const {
+bool StudentWorld::determineOverlap(const Actor* act1, const Actor* act2) const
+{
     double centX1 = act1->getX() + (SPRITE_WIDTH/2);
     double centY1 = act1->getY() + (SPRITE_HEIGHT/2);
     double centX2 = act2->getX() + (SPRITE_WIDTH/2);
@@ -170,7 +171,8 @@ bool StudentWorld::determineOverlap(const Actor* act1, const Actor* act2) const 
     
     return (((centX1 - centX2)*(centX1 - centX2) + (centY1 - centY2)*(centY1 - centY2)) <= 100);
 }
-bool StudentWorld::determineBlocking(double x, double y, const Actor* other) const {
+bool StudentWorld::determineBlocking(double x, double y, const Actor* other) const
+{
     if (x < (other->getX() + SPRITE_WIDTH) &&
         (x + (SPRITE_WIDTH - 1)) > other->getX() &&
         y < (other->getY() + SPRITE_HEIGHT) &&
@@ -179,7 +181,8 @@ bool StudentWorld::determineBlocking(double x, double y, const Actor* other) con
     }
     return false;
 }
-bool StudentWorld::canMove(const Actor* requester, double x, double y) const {
+bool StudentWorld::canMove(const Actor* requester, double x, double y) const
+{
     for (list<Actor*>::const_iterator it = m_actors.begin(); it != m_actors.end(); it++)
     {
         if (((*it) != requester) && (*it)->canBlock() &&
@@ -192,7 +195,8 @@ bool StudentWorld::canMove(const Actor* requester, double x, double y) const {
     return true;
 }
 
-bool StudentWorld::citizenEscapes(const Actor* exit) {
+bool StudentWorld::citizenEscapes(const Actor* exit)
+{
     for (list<Actor*>::const_iterator it = m_actors.begin(); it != m_actors.end(); it++)
     {
         if ((*it)->canMove() && (*it)->notZombie() && (*it)->stillAlive())
@@ -207,8 +211,35 @@ bool StudentWorld::citizenEscapes(const Actor* exit) {
     return false;
 }
 
-bool StudentWorld::overlapPenelope(const Actor *requester) {
+bool StudentWorld::overlapPenelope(const Actor *requester)
+{
     if (determineOverlap(requester, m_player))
         return true;
     return false;
+}
+
+void StudentWorld::awardGoodie(char type)
+{
+    m_player->awardGoodie(type);
+}
+
+void StudentWorld::infectActors(const Actor* requester)
+{
+    if (overlapPenelope(requester))
+        m_player->getInfected();
+    for (list<Actor*>::const_iterator it = m_actors.begin(); it != m_actors.end(); it++)
+    {
+        if ((*it)->stillAlive() && determineOverlap(requester, *it))
+                if ((*it)->getInfected())
+                    playSound(SOUND_CITIZEN_INFECTED);
+    }
+}
+void StudentWorld::killActors(const Actor* requester)
+{
+    if (overlapPenelope(requester))
+        m_player->setDead();
+    for (list<Actor*>::const_iterator it = m_actors.begin(); it != m_actors.end(); it++)
+    {
+        // TODO: DAMAGED FUNCTION
+    }
 }

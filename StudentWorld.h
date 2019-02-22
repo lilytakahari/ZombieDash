@@ -32,6 +32,10 @@ public:
     bool canMove(const Actor* requester, double x, double y) const;
     bool citizenEscapes(const Actor* exit);
     bool overlapPenelope(const Actor* requester);
+    void awardGoodie(char type);
+    void infectActors(const Actor* requester);
+    void killActors(const Actor* requester);
+    
 private:
     std::list<Actor*> m_actors;
     Penelope* m_player;

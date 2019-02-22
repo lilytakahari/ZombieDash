@@ -36,6 +36,7 @@ public:
     virtual bool canBeSteppedOn() const = 0;
     virtual bool canMove() const = 0;
     virtual bool notZombie() const = 0;
+    virtual bool getInfected() = 0;
 protected:
     StudentWorld* getWorld() const {
         return m_world;
@@ -82,8 +83,13 @@ public:
     bool isInfected() const {
         return m_infected;
     }
-    void getInfected() {
-        m_infected = true;
+    virtual bool getInfected() {
+        if (m_infected != true)
+        {
+            m_infected = true;
+            return true;
+        }
+        return false;
     }
     void zombify() {
         m_infectLvl++;
@@ -114,6 +120,7 @@ public:
     int getvacc() const {
         return m_vaccines;
     }
+    void awardGoodie(char type);
     
     // POTENTIALLY, SOMETHING ABOUT ESCAPING
 private:
@@ -141,6 +148,9 @@ public:
     virtual bool notZombie() const {
         return true;
     }
+    virtual bool getInfected() {
+        return false;
+    }
 };
 
 class Exit: public Actor
@@ -162,5 +172,108 @@ public:
     virtual bool notZombie() const {
         return true;
     }
+    virtual bool getInfected() {
+        return false;
+    }
+};
+
+class Goodie: public Actor
+{
+public:
+    Goodie(StudentWorld *world, int imageID, double startX, double startY)
+    : Actor(world, 1, imageID, startX, startY,
+                   right, 1)
+    {}
+    virtual bool canBlock() const {
+        return false;
+    }
+    virtual bool canBeSteppedOn() const {
+        return true;
+    }
+    virtual bool canMove() const {
+        return false;
+    }
+    virtual bool notZombie() const {
+        return true;
+    }
+    virtual void doSomething();
+    virtual void tellWorld() = 0;
+    virtual bool getInfected() {
+        return false;
+    }
+};
+
+class VaccineGoodie: public Goodie
+{
+public:
+    VaccineGoodie(StudentWorld *world, double startX, double startY)
+    : Goodie(world, IID_VACCINE_GOODIE, startX, startY)
+    {}
+    virtual void tellWorld();
+};
+
+class LandmineGoodie: public Goodie
+{
+public:
+    LandmineGoodie(StudentWorld *world, double startX, double startY)
+    : Goodie(world, IID_LANDMINE_GOODIE, startX, startY)
+    {}
+    virtual void tellWorld();
+};
+
+class GasCanGoodie: public Goodie
+{
+public:
+    GasCanGoodie(StudentWorld *world, double startX, double startY)
+    : Goodie(world, IID_GAS_CAN_GOODIE, startX, startY)
+    {}
+    virtual void tellWorld();
+};
+
+class TempDmgers: public Actor
+{
+public:
+    TempDmgers(StudentWorld *world, int imageID, double startX, double startY,
+                     int startDirection)
+    : Actor(world, 2, imageID, startX, startY,
+           startDirection, 0)
+    {}
+    virtual void doSomething();
+    virtual void damage() = 0;
+    virtual bool getInfected() {
+        return false;
+    }
+    virtual bool canBlock() const {
+        return false;
+    }
+    virtual bool canBeSteppedOn() const {
+        return true;
+    }
+    virtual bool canMove() const {
+        return false;
+    }
+    virtual bool notZombie() const {
+        return true;
+    }
+};
+
+class Vomit: public TempDmgers
+{
+public:
+    Vomit(StudentWorld *world, double startX, double startY,
+          int startDirection)
+    : TempDmgers(world, IID_VOMIT, startX, startY, startDirection)
+    {}
+    virtual void damage();
+};
+
+class Flame: public TempDmgers
+{
+public:
+    Flame(StudentWorld *world, double startX, double startY,
+          int startDirection)
+    : TempDmgers(world, IID_FLAME, startX, startY, startDirection)
+    {}
+    virtual void damage();
 };
 #endif // ACTOR_H_
