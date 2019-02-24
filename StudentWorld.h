@@ -13,7 +13,7 @@ class StudentWorld : public GameWorld
 {
 public:
     StudentWorld(std::string assetPath);
-    ~StudentWorld();
+    virtual ~StudentWorld();
     virtual int init();
     virtual int move();
     virtual void cleanUp();
@@ -27,7 +27,7 @@ public:
     void nowPassed() {
         m_passed = true;
     }
-    bool determineOverlap(const Actor* act1, const Actor* act2) const;
+    bool determineOverlap(double x, double y, const Actor* act2) const;
     bool determineBlocking(double x, double y, const Actor* other) const;
     bool canMove(const Actor* requester, double x, double y) const;
     bool citizenEscapes(const Actor* exit);
@@ -35,6 +35,8 @@ public:
     void awardGoodie(char type);
     void infectActors(const Actor* requester);
     void killActors(const Actor* requester);
+    bool createActorAt(char type, double x, double y, int dir);
+    bool detectVomitTarget(double x, double y);
     
 private:
     std::list<Actor*> m_actors;

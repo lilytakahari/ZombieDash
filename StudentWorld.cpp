@@ -44,7 +44,7 @@ int StudentWorld::init()
     if (result == Level::load_fail_file_not_found)
         return GWSTATUS_PLAYER_WON;
     else if (result == Level::load_fail_bad_format)
-        cerr << "Your level was improperly formatted" << endl;
+        return GWSTATUS_LEVEL_ERROR;
     else if (result == Level::load_success)
     {
         cerr << "Successfully loaded level" << endl;
@@ -61,6 +61,7 @@ int StudentWorld::init()
                     case Level::smart_zombie:
                         break;
                     case Level::dumb_zombie:
+                        toAdd = new DumbZombie(this, screenX, screenY);
                         break;
                     case Level::player:
                         m_player = new Penelope(this, screenX, screenY);
@@ -162,10 +163,10 @@ void StudentWorld::cleanUp()
     m_player = nullptr;
 }
 
-bool StudentWorld::determineOverlap(const Actor* act1, const Actor* act2) const
+bool StudentWorld::determineOverlap(double x, double y, const Actor* act2) const
 {
-    double centX1 = act1->getX() + (SPRITE_WIDTH/2);
-    double centY1 = act1->getY() + (SPRITE_HEIGHT/2);
+    double centX1 = x + (SPRITE_WIDTH/2);
+    double centY1 = y + (SPRITE_HEIGHT/2);
     double centX2 = act2->getX() + (SPRITE_WIDTH/2);
     double centY2 = act2->getY() + (SPRITE_HEIGHT/2);
     
@@ -201,7 +202,7 @@ bool StudentWorld::citizenEscapes(const Actor* exit)
     {
         if ((*it)->canMove() && (*it)->notZombie() && (*it)->stillAlive())
         {
-            if (determineOverlap(exit, *it)) {
+            if (determineOverlap(exit->getX(), exit->getY(), *it)) {
                 (*it)->setDead();
                 decPeople();
                 return true;
@@ -213,7 +214,7 @@ bool StudentWorld::citizenEscapes(const Actor* exit)
 
 bool StudentWorld::overlapPenelope(const Actor *requester)
 {
-    if (determineOverlap(requester, m_player))
+    if (determineOverlap(requester->getX(), requester->getY(), m_player))
         return true;
     return false;
 }
@@ -229,17 +230,69 @@ void StudentWorld::infectActors(const Actor* requester)
         m_player->getInfected();
     for (list<Actor*>::const_iterator it = m_actors.begin(); it != m_actors.end(); it++)
     {
-        if ((*it)->stillAlive() && determineOverlap(requester, *it))
+        if ((*it)->stillAlive()
+            && determineOverlap(requester->getX(), requester->getY(), *it))
+        {
                 if ((*it)->getInfected())
                     playSound(SOUND_CITIZEN_INFECTED);
+        }
     }
 }
 void StudentWorld::killActors(const Actor* requester)
 {
     if (overlapPenelope(requester))
-        m_player->setDead();
+        m_player->getKilled();
     for (list<Actor*>::const_iterator it = m_actors.begin(); it != m_actors.end(); it++)
     {
-        // TODO: DAMAGED FUNCTION
+        if ((*it) != requester && (*it)->stillAlive()
+            && determineOverlap(requester->getX(), requester->getY(), *it))
+        {
+            (*it)->getKilled();
+        }
     }
+}
+
+bool StudentWorld::createActorAt(char type, double x, double y, int dir) {
+    if (type == 'f' || type == 'v')
+    {
+        for (list<Actor*>::const_iterator it = m_actors.begin(); it != m_actors.end(); it++)
+        {
+            if ((*it)->canBlock() && !(*it)->canMove() && (*it)->stillAlive())
+            {
+                if (determineOverlap(x, y, (*it)))
+                    return false;
+            }
+        }
+    }
+    Actor* toAdd = nullptr;
+    switch (type)
+    {
+        case 'f':
+            toAdd = new Flame(this, x, y, dir);
+            break;
+        case 'v':
+            toAdd = new Vomit(this, x, y, dir);
+            break;
+        case 'x':
+            toAdd = new VaccineGoodie(this, x, y);
+    }
+    if (toAdd != nullptr) {
+        m_actors.push_back(toAdd);
+        return true;
+    } else
+        return false;
+}
+
+bool StudentWorld::detectVomitTarget(double x, double y) {
+    if (determineOverlap(x, y, m_player))
+        return true;
+    for (list<Actor*>::const_iterator it = m_actors.begin(); it != m_actors.end(); it++)
+    {
+        if ((*it)->notZombie() && (*it)->canMove() && (*it)->stillAlive())
+        {
+            if (determineOverlap(x, y, (*it)))
+                return true;
+        }
+    }
+    return false;
 }

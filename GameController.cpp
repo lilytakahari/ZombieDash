@@ -186,6 +186,7 @@ void GameController::specialKeyboardEvent(int key, int /* x */, int /* y */)
         case GLUT_KEY_RIGHT: m_lastKeyHit = KEY_PRESS_RIGHT; break;
         case GLUT_KEY_UP:    m_lastKeyHit = KEY_PRESS_UP;    break;
         case GLUT_KEY_DOWN:  m_lastKeyHit = KEY_PRESS_DOWN;  break;
+
         default:             m_lastKeyHit = INVALID_KEY;     break;
     }
 }

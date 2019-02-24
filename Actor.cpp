@@ -3,6 +3,7 @@
 
 // Students:  Add code to this file, Actor.h, StudentWorld.h, and StudentWorld.cpp
 #include "GameConstants.h"
+#include <iostream>
 
 bool Movers::canMoveTo(double destX, double destY)
 {
@@ -45,8 +46,7 @@ void Penelope::doSomething()
     {
         zombify();
         if (isZombieNow()) {
-            setDead();
-            getWorld()->playSound(SOUND_PLAYER_DIE);
+            getKilled();
             return;
         }
     }
@@ -80,6 +80,46 @@ void Penelope::doSomething()
                 // move up
                 setDirection(up);
                 canMoveTo(currX, currY+4);
+                break;
+            }
+            case KEY_PRESS_SPACE: {
+                if (m_flames > 0) {
+                    m_flames--;
+                    myWorld->playSound(SOUND_PLAYER_FIRE);
+                    int dir = getDirection();
+                    for (int i = 1; i <= 3; i++) {
+                        bool flameSuccess = true;
+                        switch (dir)
+                        {
+                            case up: {
+                                flameSuccess = myWorld->createActorAt('f', currX, currY + i * SPRITE_HEIGHT, up);
+                                break;
+                            }
+                            case left: {
+                                flameSuccess = myWorld->createActorAt('f', currX - i * SPRITE_WIDTH, currY , left);
+                                break;
+                            }
+                            case down: {
+                                flameSuccess = myWorld->createActorAt('f', currX, currY - i * SPRITE_HEIGHT, down);
+                                break;
+                            }
+                            case right: {
+                                flameSuccess = myWorld->createActorAt('f', currX + i * SPRITE_WIDTH, currY, right);
+                                break;
+                            }
+                        }
+                        if (!flameSuccess)
+                            break;
+                    }
+                }
+                break;
+            }
+            case KEY_PRESS_ENTER: {
+                if (m_vaccines > 0) {
+                    cure();
+                    std::cerr << "enter pressed" << std::endl;
+                    m_vaccines--;
+                }
                 break;
             }
         }
@@ -135,4 +175,93 @@ void Vomit::damage() {
 
 void Flame::damage() {
     getWorld()->killActors(this);
+}
+
+bool Penelope::getKilled() {
+    getWorld()->playSound(SOUND_PLAYER_DIE);
+    setDead();
+    return true;
+}
+
+bool Zombie::getKilled()
+{
+    getWorld()->playSound(SOUND_ZOMBIE_DIE);
+    setDead();
+    return true;
+}
+
+void Zombie::doSomething()
+{
+    if (!stillAlive())
+        return;
+    if (m_skipMove) {
+        m_skipMove = false;
+        return;
+    }
+    m_skipMove = true;
+    double vomitX = getX();
+    double vomitY = getY();
+    switch (getDirection()) {
+        case up:
+            vomitY += SPRITE_HEIGHT;
+            break;
+        case down:
+            vomitY -= SPRITE_HEIGHT;
+            break;
+        case right:
+            vomitX += SPRITE_HEIGHT;
+            break;
+        case left:
+            vomitX -= SPRITE_HEIGHT;
+            break;
+    }
+    StudentWorld* myWorld = getWorld();
+    if (myWorld->detectVomitTarget(vomitX, vomitY))
+    {
+        myWorld->createActorAt('v', vomitX, vomitY, getDirection());
+        myWorld->playSound(SOUND_ZOMBIE_VOMIT);
+        return;
+    }
+    if (m_moveplan == 0)
+    {
+        m_moveplan = randInt(3, 10);
+        setDirection(determineDirection());
+    }
+    double currX = getX();
+    double currY = getY();
+    bool couldMove = false;
+    switch (getDirection())
+    {
+        case up:
+            couldMove = canMoveTo(currX, currY+1);
+            break;
+        case down:
+            couldMove = canMoveTo(currX, currY-1);
+            break;
+        case left:
+            couldMove = canMoveTo(currX-1, currY);
+            break;
+        case right:
+            couldMove = canMoveTo(currX+1, currY);
+            break;
+    }
+    if (!couldMove)
+        m_moveplan = 0;
+    else
+        m_moveplan--;
+}
+
+int Zombie::randDir() {
+    int dirs[4] = {up, down, left, right};
+    return dirs[randInt(0, 3)];
+}
+
+bool DumbZombie::getKilled()
+{
+    Zombie::getKilled();
+    getWorld()->increaseScore(1000);
+    if (randInt(1, 10) == 1) {
+        getWorld()->createActorAt('x', getX(), getY(), right);
+    }
+    return true;
 }
