@@ -33,6 +33,7 @@ public:
     bool citizenEscapes(const Actor* exit);
     bool overlapPenelope(const Actor* requester);
     bool overlapMover(const Actor* requester);
+    bool overlapAny(double x, double y);
     void awardGoodie(char type);
     void infectActors(const Actor* requester);
     void killActors(const Actor* requester);

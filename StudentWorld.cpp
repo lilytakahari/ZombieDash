@@ -137,15 +137,15 @@ int StudentWorld::move()
     }
     // Update game status line
     ostringstream gameStatus;
-    gameStatus << "Score:  ";
+    gameStatus << "Score: ";
     gameStatus.fill('0');
     gameStatus << setw(6) << getScore();
-    gameStatus << "  Level:  " << getLevel();
-    gameStatus << "  Lives:  " << getLives();
-    gameStatus << "  Vacc:  " << m_player->getvacc();
-    gameStatus << "  Flames:  " << m_player->getfl();
-    gameStatus << "  Mines:  " << m_player->getlm();
-    gameStatus << "  Infected:  " << m_player->getInfectLvl();
+    gameStatus << "  Level: " << getLevel();
+    gameStatus << "  Lives: " << getLives();
+    gameStatus << "  Vaccines: " << m_player->getvacc();
+    gameStatus << "  Flames: " << m_player->getfl();
+    gameStatus << "  Mines: " << m_player->getlm();
+    gameStatus << "  Infected: " << m_player->getInfectLvl();
     setGameStatText(gameStatus.str());
     
     return GWSTATUS_CONTINUE_GAME;
@@ -259,10 +259,21 @@ bool StudentWorld::createActorAt(char type, double x, double y, int dir)
     {
         for (list<Actor*>::const_iterator it = m_actors.begin(); it != m_actors.end(); it++)
         {
-            if ((*it)->canBlock() && !(*it)->canMove() && (*it)->stillAlive())
+            if (type == 'v')
             {
-                if (determineOverlap(x, y, (*it)))
-                    return false;
+                if ((*it)->canBlock() && !(*it)->canBeSteppedOn() && (*it)->stillAlive())
+                {
+                    if (determineOverlap(x, y, (*it)))
+                        return false;
+                }
+            }
+            else
+            {
+                if ((*it)->canBlock() && !(*it)->canMove() && (*it)->stillAlive())
+                {
+                    if (determineOverlap(x, y, (*it)))
+                        return false;
+                }
             }
         }
     }
@@ -313,6 +324,18 @@ bool StudentWorld::overlapMover(const Actor *requester)
     {
         if ((*it)->canMove() && (*it)->stillAlive()
             && determineOverlap(requester->getX(), requester->getY(), *it))
+            return true;
+    }
+    return false;
+}
+
+bool StudentWorld::overlapAny(double x, double y)
+{
+    if (determineOverlap(x, y, m_player))
+        return true;
+    for (list<Actor*>::const_iterator it = m_actors.begin(); it != m_actors.end(); it++)
+    {
+        if (determineOverlap(x, y, *it))
             return true;
     }
     return false;

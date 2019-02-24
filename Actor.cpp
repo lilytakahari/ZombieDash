@@ -206,22 +206,8 @@ void Zombie::doSomething()
         return;
     }
     m_skipMove = true;
-    double vomitX = getX();
-    double vomitY = getY();
-    switch (getDirection()) {
-        case up:
-            vomitY += SPRITE_HEIGHT;
-            break;
-        case down:
-            vomitY -= SPRITE_HEIGHT;
-            break;
-        case right:
-            vomitX += SPRITE_HEIGHT;
-            break;
-        case left:
-            vomitX -= SPRITE_HEIGHT;
-            break;
-    }
+    double vomitX, vomitY;
+    computeThrowLoc(getDirection(), vomitX, vomitY);
     StudentWorld* myWorld = getWorld();
     if (myWorld->detectVomitTarget(vomitX, vomitY))
     {
@@ -263,12 +249,40 @@ int Zombie::randDir() {
     return dirs[randInt(0, 3)];
 }
 
+void Zombie::computeThrowLoc(int dir, double& x, double& y)
+{
+    double throwX = getX();
+    double throwY = getY();
+    switch (dir)
+    {
+        case up:
+            throwY += SPRITE_HEIGHT;
+            break;
+        case down:
+            throwY -= SPRITE_HEIGHT;
+            break;
+        case right:
+            throwX += SPRITE_WIDTH;
+            break;
+        case left:
+            throwX -= SPRITE_WIDTH;
+            break;
+    }
+    x = throwX;
+    y = throwY;
+}
+
 bool DumbZombie::getKilled()
 {
     Zombie::getKilled();
     getWorld()->increaseScore(1000);
     if (randInt(1, 10) == 1) {
-        getWorld()->createActorAt('x', getX(), getY(), right);
+        double vaccX, vaccY;
+        computeThrowLoc(randDir(), vaccX, vaccY);
+        if (getWorld()->overlapAny(vaccX, vaccY))
+            return true;
+        else
+            getWorld()->createActorAt('x', vaccX, vaccY, right);
     }
     return true;
 }
@@ -303,14 +317,14 @@ void Landmine::explode()
     myWorld->playSound(SOUND_LANDMINE_EXPLODE);
     double currX = getX();
     double currY = getY();
-    myWorld->createActorAt('f', currX, currY, right);
-    myWorld->createActorAt('f', currX - SPRITE_WIDTH, currY, right);
-    myWorld->createActorAt('f', currX + SPRITE_WIDTH, currY, right);
-    myWorld->createActorAt('f', currX, currY - SPRITE_HEIGHT, right);
-    myWorld->createActorAt('f', currX - SPRITE_WIDTH, currY - SPRITE_HEIGHT, right);
-    myWorld->createActorAt('f', currX + SPRITE_WIDTH, currY + SPRITE_HEIGHT, right);
-    myWorld->createActorAt('f', currX, currY + SPRITE_HEIGHT, right);
-    myWorld->createActorAt('f', currX - SPRITE_WIDTH, currY + SPRITE_HEIGHT, right);
-    myWorld->createActorAt('f', currX + SPRITE_WIDTH, currY - SPRITE_HEIGHT, right);
-    myWorld->createActorAt('p', currX, currY, right);
+    myWorld->createActorAt('f', currX, currY, up);
+    myWorld->createActorAt('f', currX - SPRITE_WIDTH, currY, up);
+    myWorld->createActorAt('f', currX + SPRITE_WIDTH, currY, up);
+    myWorld->createActorAt('f', currX, currY - SPRITE_HEIGHT, up);
+    myWorld->createActorAt('f', currX - SPRITE_WIDTH, currY - SPRITE_HEIGHT, up);
+    myWorld->createActorAt('f', currX + SPRITE_WIDTH, currY + SPRITE_HEIGHT, up);
+    myWorld->createActorAt('f', currX, currY + SPRITE_HEIGHT, up);
+    myWorld->createActorAt('f', currX - SPRITE_WIDTH, currY + SPRITE_HEIGHT, up);
+    myWorld->createActorAt('f', currX + SPRITE_WIDTH, currY - SPRITE_HEIGHT, up);
+    myWorld->createActorAt('p', currX, currY, up);
 }

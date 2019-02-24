@@ -220,23 +220,8 @@ class VaccineGoodie: public Goodie
 public:
     VaccineGoodie(StudentWorld *world, double startX, double startY)
     : Goodie(world, IID_VACCINE_GOODIE, startX, startY)
-    {
-        m_invinc = 2;
-    }
-    virtual void doSomething() {
-        if (m_invinc > 0)
-            m_invinc--;
-        Goodie::doSomething();
-    }
-    virtual bool getKilled() {
-        if (m_invinc != 0)
-            return false;
-        setDead();
-        return true;
-    }
+    {}
     virtual void tellWorld();
-private:
-    int m_invinc;
 };
 
 class LandmineGoodie: public Goodie
@@ -327,7 +312,7 @@ public:
     virtual int determineDirection() = 0;
 protected:
     int randDir();
-    
+    void computeThrowLoc(int dir, double& x, double& y);
 private:
     int m_moveplan;
     bool m_skipMove;
