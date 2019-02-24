@@ -257,10 +257,10 @@ public:
     virtual void tellWorld();
 };
 
-class TempDmgers: public Actor
+class Dmgers: public Actor
 {
 public:
-    TempDmgers(StudentWorld *world, int imageID, double startX, double startY,
+    Dmgers(StudentWorld *world, int imageID, double startX, double startY,
                      int startDirection)
     : Actor(world, 2, imageID, startX, startY,
            startDirection, 0)
@@ -287,22 +287,22 @@ public:
     }
 };
 
-class Vomit: public TempDmgers
+class Vomit: public Dmgers
 {
 public:
     Vomit(StudentWorld *world, double startX, double startY,
           int startDirection)
-    : TempDmgers(world, IID_VOMIT, startX, startY, startDirection)
+    : Dmgers(world, IID_VOMIT, startX, startY, startDirection)
     {}
     virtual void damage();
 };
 
-class Flame: public TempDmgers
+class Flame: public Dmgers
 {
 public:
     Flame(StudentWorld *world, double startX, double startY,
           int startDirection)
-    : TempDmgers(world, IID_FLAME, startX, startY, startDirection)
+    : Dmgers(world, IID_FLAME, startX, startY, startDirection)
     {}
     virtual void damage();
 };
@@ -344,5 +344,51 @@ public:
         return randDir();
     }
     virtual bool getKilled();
+};
+
+class Pit: public Dmgers
+{
+public:
+    Pit(StudentWorld *world, double startX, double startY)
+    : Dmgers(world, IID_PIT, startX, startY, right)
+    {}
+    virtual void doSomething() {
+        if (!stillAlive())
+            return;
+        damage();
+    }
+    virtual void damage();
+};
+
+class Landmine: public Actor
+{
+public:
+    Landmine(StudentWorld* world, double startX, double startY)
+    : Actor(world, 1, IID_LANDMINE, startX, startY, right, 1)
+    {
+        std::cerr << "landmine constructor" << std::endl;
+        m_safety = 30;
+    }
+    virtual void doSomething();
+    
+    virtual bool canBlock() const {
+        return false;
+    }
+    virtual bool canBeSteppedOn() const {
+        return true;
+    }
+    virtual bool canMove() const {
+        return false;
+    }
+    virtual bool notZombie() const {
+        return true;
+    }
+    virtual bool getInfected() {
+        return false;
+    }
+    virtual bool getKilled();
+    void explode();
+private:
+    int m_safety;
 };
 #endif // ACTOR_H_

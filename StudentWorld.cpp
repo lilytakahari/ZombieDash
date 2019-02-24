@@ -73,6 +73,7 @@ int StudentWorld::init()
                         toAdd = new Wall(screenX, screenY);
                         break;
                     case Level::pit:
+                        toAdd = new Pit(this, screenX, screenY);
                         break;
                     case Level::vaccine_goodie:
                         toAdd = new VaccineGoodie(this, screenX, screenY);
@@ -252,8 +253,9 @@ void StudentWorld::killActors(const Actor* requester)
     }
 }
 
-bool StudentWorld::createActorAt(char type, double x, double y, int dir) {
-    if (type == 'f' || type == 'v')
+bool StudentWorld::createActorAt(char type, double x, double y, int dir)
+{
+    if (type == 'f' || type == 'v' || type == 'l')
     {
         for (list<Actor*>::const_iterator it = m_actors.begin(); it != m_actors.end(); it++)
         {
@@ -267,6 +269,12 @@ bool StudentWorld::createActorAt(char type, double x, double y, int dir) {
     Actor* toAdd = nullptr;
     switch (type)
     {
+        case 'l':
+            toAdd = new Landmine(this, x, y);
+            break;
+        case 'p':
+            toAdd = new Pit(this, x, y);
+            break;
         case 'f':
             toAdd = new Flame(this, x, y, dir);
             break;
@@ -275,6 +283,7 @@ bool StudentWorld::createActorAt(char type, double x, double y, int dir) {
             break;
         case 'x':
             toAdd = new VaccineGoodie(this, x, y);
+            break;
     }
     if (toAdd != nullptr) {
         m_actors.push_back(toAdd);
@@ -283,7 +292,8 @@ bool StudentWorld::createActorAt(char type, double x, double y, int dir) {
         return false;
 }
 
-bool StudentWorld::detectVomitTarget(double x, double y) {
+bool StudentWorld::detectVomitTarget(double x, double y)
+{
     if (determineOverlap(x, y, m_player))
         return true;
     for (list<Actor*>::const_iterator it = m_actors.begin(); it != m_actors.end(); it++)
@@ -293,6 +303,17 @@ bool StudentWorld::detectVomitTarget(double x, double y) {
             if (determineOverlap(x, y, (*it)))
                 return true;
         }
+    }
+    return false;
+}
+
+bool StudentWorld::overlapMover(const Actor *requester)
+{
+    for (list<Actor*>::const_iterator it = m_actors.begin(); it != m_actors.end(); it++)
+    {
+        if ((*it)->canMove() && (*it)->stillAlive()
+            && determineOverlap(requester->getX(), requester->getY(), *it))
+            return true;
     }
     return false;
 }

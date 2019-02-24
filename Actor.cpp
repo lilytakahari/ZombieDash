@@ -62,26 +62,26 @@ void Penelope::doSomething()
                 // move left
                 setDirection(left);
                 canMoveTo(currX-4, currY);
-                break;
             }
+                break;
             case KEY_PRESS_RIGHT: {
                 //move right
                 setDirection(right);
                 canMoveTo(currX+4, currY);
-                break;
             }
+                break;
             case KEY_PRESS_DOWN: {
                 // move down
                 setDirection(down);
                 canMoveTo(currX, currY-4);
-                break;
             }
+                break;
             case KEY_PRESS_UP: {
                 // move up
                 setDirection(up);
                 canMoveTo(currX, currY+4);
-                break;
             }
+                 break;
             case KEY_PRESS_SPACE: {
                 if (m_flames > 0) {
                     m_flames--;
@@ -112,16 +112,23 @@ void Penelope::doSomething()
                             break;
                     }
                 }
-                break;
             }
+                 break;
             case KEY_PRESS_ENTER: {
                 if (m_vaccines > 0) {
                     cure();
                     std::cerr << "enter pressed" << std::endl;
                     m_vaccines--;
                 }
-                break;
             }
+                break;
+            case KEY_PRESS_TAB: {
+                if (m_landmines > 0) {
+                    if (getWorld()->createActorAt('l', currX, currY, right))
+                        m_landmines--;
+                }
+            }
+                break;
         }
     }
 }
@@ -162,7 +169,7 @@ void VaccineGoodie::tellWorld() {
     getWorld()->awardGoodie('v');
 }
 
-void TempDmgers::doSomething() {
+void Dmgers::doSomething() {
     if (!stillAlive())
         return;
     damage();
@@ -264,4 +271,46 @@ bool DumbZombie::getKilled()
         getWorld()->createActorAt('x', getX(), getY(), right);
     }
     return true;
+}
+
+void Pit::damage() {
+    getWorld()->killActors(this);
+}
+
+void Landmine::doSomething()
+{
+    if (!stillAlive())
+        return;
+    if (m_safety > 0) {
+        std::cerr << m_safety << std::endl;
+        m_safety--;
+        return;
+    }
+    if (getWorld()->overlapPenelope(this)
+        || getWorld()->overlapMover(this))
+        explode();
+}
+bool Landmine::getKilled()
+{
+    explode();
+    return true;
+}
+
+void Landmine::explode()
+{
+    setDead();
+    StudentWorld* myWorld = getWorld();
+    myWorld->playSound(SOUND_LANDMINE_EXPLODE);
+    double currX = getX();
+    double currY = getY();
+    myWorld->createActorAt('f', currX, currY, right);
+    myWorld->createActorAt('f', currX - SPRITE_WIDTH, currY, right);
+    myWorld->createActorAt('f', currX + SPRITE_WIDTH, currY, right);
+    myWorld->createActorAt('f', currX, currY - SPRITE_HEIGHT, right);
+    myWorld->createActorAt('f', currX - SPRITE_WIDTH, currY - SPRITE_HEIGHT, right);
+    myWorld->createActorAt('f', currX + SPRITE_WIDTH, currY + SPRITE_HEIGHT, right);
+    myWorld->createActorAt('f', currX, currY + SPRITE_HEIGHT, right);
+    myWorld->createActorAt('f', currX - SPRITE_WIDTH, currY + SPRITE_HEIGHT, right);
+    myWorld->createActorAt('f', currX + SPRITE_WIDTH, currY - SPRITE_HEIGHT, right);
+    myWorld->createActorAt('p', currX, currY, right);
 }
