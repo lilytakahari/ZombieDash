@@ -39,8 +39,12 @@ public:
     void killActors(const Actor* requester);
     bool createActorAt(char type, double x, double y, int dir);
     bool detectVomitTarget(double x, double y);
+    bool findNearestHuman(Actor* requester, double& otherX, double& otherY, double& distance);
+    bool findNearestZombie(double x, double y, double& otherX, double& otherY, double& distance);
+    bool distanceToPenelope(Actor* requester, double& otherX, double& otherY, double& distance);
     
 private:
+    double calculateDistance(double x1, double y1, double x2, double y2);
     std::list<Actor*> m_actors;
     Penelope* m_player;
     

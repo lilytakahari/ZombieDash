@@ -9,6 +9,7 @@ using namespace std;
 #include <iostream> // defines the overloads of the << operator
 #include <sstream>  // defines the type std::ostringstream
 #include <iomanip>  // defines the manipulator setw
+#include <cmath>
 
 GameWorld* createStudentWorld(string assetPath)
 {
@@ -59,6 +60,7 @@ int StudentWorld::init()
                     case Level::empty:
                         break;
                     case Level::smart_zombie:
+                        toAdd = new SmartZombie(this, screenX, screenY);
                         break;
                     case Level::dumb_zombie:
                         toAdd = new DumbZombie(this, screenX, screenY);
@@ -85,7 +87,8 @@ int StudentWorld::init()
                         toAdd = new LandmineGoodie(this, screenX, screenY);
                         break;
                     case Level::citizen:
-                        //m_pplLeft++;
+                        m_pplLeft++;
+                        toAdd = new Citizen(this, screenX, screenY);
                         break;
                 }
                 if (toAdd != nullptr)
@@ -176,15 +179,17 @@ bool StudentWorld::determineOverlap(double x, double y, const Actor* act2) const
 bool StudentWorld::determineBlocking(double x, double y, const Actor* other) const
 {
     if (x < (other->getX() + SPRITE_WIDTH) &&
-        (x + (SPRITE_WIDTH - 1)) > other->getX() &&
+        (x + SPRITE_WIDTH) > other->getX() &&
         y < (other->getY() + SPRITE_HEIGHT) &&
-        (y + (SPRITE_HEIGHT - 1)) > other->getY()) {
+        (y + SPRITE_HEIGHT) > other->getY()) {
         return true;
     }
     return false;
 }
 bool StudentWorld::canMove(const Actor* requester, double x, double y) const
 {
+    if (m_player != requester && determineBlocking(x, y, m_player))
+        return false;
     for (list<Actor*>::const_iterator it = m_actors.begin(); it != m_actors.end(); it++)
     {
         if (((*it) != requester) && (*it)->canBlock() &&
@@ -259,9 +264,9 @@ bool StudentWorld::createActorAt(char type, double x, double y, int dir)
     {
         for (list<Actor*>::const_iterator it = m_actors.begin(); it != m_actors.end(); it++)
         {
-            if (type == 'v')
+            if (type == 'v' || type == 'l')
             {
-                if ((*it)->canBlock() && !(*it)->canBeSteppedOn() && (*it)->stillAlive())
+                if (!(*it)->canMove() && (*it)->canBlock() && !(*it)->canBeSteppedOn() && (*it)->stillAlive())
                 {
                     if (determineOverlap(x, y, (*it)))
                         return false;
@@ -280,6 +285,12 @@ bool StudentWorld::createActorAt(char type, double x, double y, int dir)
     Actor* toAdd = nullptr;
     switch (type)
     {
+        case 's':
+            toAdd = new SmartZombie(this, x, y);
+            break;
+        case 'z':
+            toAdd = new DumbZombie(this, x, y);
+            break;
         case 'l':
             toAdd = new Landmine(this, x, y);
             break;
@@ -294,6 +305,9 @@ bool StudentWorld::createActorAt(char type, double x, double y, int dir)
             break;
         case 'x':
             toAdd = new VaccineGoodie(this, x, y);
+            break;
+        default:
+            return false;
             break;
     }
     if (toAdd != nullptr) {
@@ -339,4 +353,74 @@ bool StudentWorld::overlapAny(double x, double y)
             return true;
     }
     return false;
+}
+
+double StudentWorld::calculateDistance(double x1, double y1, double x2, double y2)
+{
+    double toRad = (x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2);
+    return (sqrt(toRad));
+}
+
+bool StudentWorld::findNearestHuman(Actor* requester, double& otherX, double& otherY, double& distance)
+{
+    if (!m_player->stillAlive())
+        return false;
+    double x = requester->getX();
+    double y = requester->getY();
+    double compX = m_player->getX();
+    double compY = m_player->getY();
+    double compDist = calculateDistance(x, y, compX, compY);
+    for (list<Actor*>::const_iterator it = m_actors.begin(); it != m_actors.end(); it++)
+    {
+        if ((*it)->notZombie() && (*it)->canMove() && (*it)->stillAlive())
+        {
+            double currDist = calculateDistance(x, y, (*it)->getX(), (*it)->getY());
+            if (currDist < compDist)
+            {
+                compX = (*it)->getX();
+                compY = (*it)->getY();
+                compDist = currDist;
+            }
+        }
+    }
+    otherX = compX;
+    otherY = compY;
+    distance = compDist;
+    return true;
+}
+
+bool StudentWorld::findNearestZombie(double x, double y, double &otherX,
+                                     double &otherY, double &distance)
+
+{
+    double compX = -1;
+    double compY = -1;
+    double compDist = VIEW_WIDTH*VIEW_HEIGHT;
+    for (list<Actor*>::const_iterator it = m_actors.begin(); it != m_actors.end(); it++)
+    {
+        if (!(*it)->notZombie() && (*it)->canMove() && (*it)->stillAlive())
+        {
+            double currDist = calculateDistance(x, y, (*it)->getX(), (*it)->getY());
+            if (currDist < compDist)
+            {
+                compX = (*it)->getX();
+                compY = (*it)->getY();
+                compDist = currDist;
+            }
+        }
+    }
+    otherX = compX;
+    otherY = compY;
+    distance = compDist;
+    return true;
+}
+
+bool StudentWorld::distanceToPenelope(Actor* requester, double& otherX, double& otherY, double& distance)
+{
+    if (!m_player->stillAlive())
+        return false;
+    otherX = m_player->getX();
+    otherY = m_player->getY();
+    distance = calculateDistance(requester->getX(), requester->getY(), otherX, otherY);
+    return true;
 }

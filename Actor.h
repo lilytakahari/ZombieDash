@@ -29,13 +29,14 @@ public:
     }
     
     virtual void doSomething() = 0;
+    virtual bool getKilled() = 0;
     
     virtual bool canBlock() const = 0;
     virtual bool canBeSteppedOn() const = 0;
     virtual bool canMove() const = 0;
     virtual bool notZombie() const = 0;
     virtual bool getInfected() = 0;
-    virtual bool getKilled() = 0;
+    
 protected:
     StudentWorld* getWorld() const {
         return m_world;
@@ -63,6 +64,8 @@ public:
         return true;
     }
     bool canMoveTo(double destX, double destY);
+protected:
+    int determineFollowDirection(double x, double y, int &otherDir, bool &twoDir);
 };
 
 class Human: public Movers
@@ -331,6 +334,16 @@ public:
     virtual bool getKilled();
 };
 
+class SmartZombie: public Zombie
+{
+public:
+    SmartZombie(StudentWorld *world, double startX, double startY)
+    : Zombie(world, startX, startY)
+    {}
+    virtual bool getKilled();
+    virtual int determineDirection();
+};
+
 class Pit: public Dmgers
 {
 public:
@@ -351,7 +364,6 @@ public:
     Landmine(StudentWorld* world, double startX, double startY)
     : Actor(world, 1, IID_LANDMINE, startX, startY, right, 1)
     {
-        std::cerr << "landmine constructor" << std::endl;
         m_safety = 30;
     }
     virtual void doSomething();
@@ -375,5 +387,21 @@ public:
     void explode();
 private:
     int m_safety;
+};
+
+class Citizen: public Human
+{
+public:
+    Citizen(StudentWorld* world, double startX, double startY)
+    : Human(world, IID_CITIZEN, startX, startY, right, 0)
+    {
+        m_skipMove = false;
+    }
+    virtual void doSomething();
+    virtual bool getKilled();
+private:
+    int reverseDirection(int dir, int &dirSub);
+    bool m_skipMove;
+    bool moveInDir(int dir);
 };
 #endif // ACTOR_H_
