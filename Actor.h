@@ -24,9 +24,6 @@ public:
     void setDead() {
         m_HP = 0;
     }
-    void decHealth() {
-        m_HP--;
-    }
     
     virtual void doSomething() = 0;
     virtual bool getKilled() = 0;
@@ -38,6 +35,9 @@ public:
     virtual bool getInfected() = 0;
     
 protected:
+    void decHealth() {
+        m_HP--;
+    }
     StudentWorld* getWorld() const {
         return m_world;
     }
@@ -63,9 +63,9 @@ public:
     virtual bool canMove() const {
         return true;
     }
-    bool canMoveTo(double destX, double destY);
 protected:
     int determineFollowDirection(double x, double y, int &otherDir, bool &twoDir);
+    bool canMoveTo(double destX, double destY);
 };
 
 class Human: public Movers
@@ -82,9 +82,6 @@ public:
     virtual bool notZombie() const {
         return true;
     }
-    bool isInfected() const {
-        return m_infected;
-    }
     virtual bool getInfected() {
         if (m_infected == false)
         {
@@ -93,19 +90,22 @@ public:
         }
         return false;
     }
-    void zombify() {
-        m_infectLvl++;
-    }
-    bool isZombieNow() const {
-        return (m_infectLvl >= 500);
-    }
     int getInfectLvl() const {
         return m_infectLvl;
     }
 protected:
+    bool isInfected() const {
+        return m_infected;
+    }
+    bool isZombieNow() const {
+        return (m_infectLvl >= 500);
+    }
     void cure() {
         m_infected = false;
         m_infectLvl = 0;
+    }
+    void zombify() {
+        m_infectLvl++;
     }
 private:
     bool m_infected;
@@ -208,7 +208,6 @@ public:
         return true;
     }
     virtual void doSomething();
-    virtual void tellWorld() = 0;
     virtual bool getInfected() {
         return false;
     }
@@ -216,6 +215,8 @@ public:
         setDead();
         return true;
     }
+private:
+    virtual void tellWorld() = 0;
 };
 
 class VaccineGoodie: public Goodie
@@ -224,6 +225,7 @@ public:
     VaccineGoodie(StudentWorld *world, double startX, double startY)
     : Goodie(world, IID_VACCINE_GOODIE, startX, startY)
     {}
+private:
     virtual void tellWorld();
 };
 
@@ -233,6 +235,7 @@ public:
     LandmineGoodie(StudentWorld *world, double startX, double startY)
     : Goodie(world, IID_LANDMINE_GOODIE, startX, startY)
     {}
+private:
     virtual void tellWorld();
 };
 
@@ -242,6 +245,7 @@ public:
     GasCanGoodie(StudentWorld *world, double startX, double startY)
     : Goodie(world, IID_GAS_CAN_GOODIE, startX, startY)
     {}
+private:
     virtual void tellWorld();
 };
 
@@ -254,7 +258,6 @@ public:
            startDirection, 0)
     {}
     virtual void doSomething();
-    virtual void damage() = 0;
     virtual bool getInfected() {
         return false;
     }
@@ -273,6 +276,8 @@ public:
     virtual bool getKilled() {
         return false;
     }
+private:
+    virtual void damage() = 0;
 };
 
 class Vomit: public Dmgers
@@ -282,6 +287,7 @@ public:
           int startDirection)
     : Dmgers(world, IID_VOMIT, startX, startY, startDirection)
     {}
+private:
     virtual void damage();
 };
 
@@ -292,6 +298,7 @@ public:
           int startDirection)
     : Dmgers(world, IID_FLAME, startX, startY, startDirection)
     {}
+private:
     virtual void damage();
 };
 
@@ -312,11 +319,11 @@ public:
         return false;
     }
     virtual bool getKilled();
-    virtual int determineDirection() = 0;
 protected:
     int randDir();
     void computeThrowLoc(int dir, double& x, double& y);
 private:
+    virtual int determineDirection() = 0;
     int m_moveplan;
     bool m_skipMove;
 };
@@ -327,11 +334,12 @@ public:
     DumbZombie(StudentWorld *world, double startX, double startY)
     : Zombie(world, startX, startY)
     {}
+    virtual bool getKilled();
+private:
     virtual int determineDirection()
     {
         return randDir();
     }
-    virtual bool getKilled();
 };
 
 class SmartZombie: public Zombie
@@ -341,6 +349,7 @@ public:
     : Zombie(world, startX, startY)
     {}
     virtual bool getKilled();
+private:
     virtual int determineDirection();
 };
 
@@ -355,6 +364,7 @@ public:
             return;
         damage();
     }
+private:
     virtual void damage();
 };
 
@@ -384,8 +394,8 @@ public:
         return false;
     }
     virtual bool getKilled();
-    void explode();
 private:
+    void explode();
     int m_safety;
 };
 
@@ -400,7 +410,7 @@ public:
     virtual void doSomething();
     virtual bool getKilled();
 private:
-    int reverseDirection(int dir, int &dirSub);
+    int reverseDirection(int dir);
     bool m_skipMove;
     bool moveInDir(int dir);
 };

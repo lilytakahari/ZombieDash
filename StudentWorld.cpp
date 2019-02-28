@@ -260,13 +260,13 @@ void StudentWorld::killActors(const Actor* requester)
 
 bool StudentWorld::createActorAt(char type, double x, double y, int dir)
 {
-    if (type == 'f' || type == 'v' || type == 'l')
+    if (type == 'v' || type == 'f')
     {
         for (list<Actor*>::const_iterator it = m_actors.begin(); it != m_actors.end(); it++)
         {
-            if (type == 'v' || type == 'l')
+            if (type == 'v')
             {
-                if (!(*it)->canMove() && (*it)->canBlock() && !(*it)->canBeSteppedOn() && (*it)->stillAlive())
+                if (!(*it)->canMove()  && !(*it)->canBeSteppedOn() && (*it)->stillAlive())
                 {
                     if (determineOverlap(x, y, (*it)))
                         return false;

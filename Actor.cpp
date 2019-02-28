@@ -439,10 +439,8 @@ void Citizen::doSomething()
         }
         if (stay)
             return;
-        int otherDir, moveIt;
-        int moveDir = reverseDirection(determineFollowDirection(zX, zY, otherDir, stay), moveIt);
-        /*if (!getWorld()->canMove(this, potX[moveIt], potY[moveIt]))
-            return;*/
+        int otherDir;
+        int moveDir = reverseDirection(determineFollowDirection(zX, zY, otherDir, stay));
         moveInDir(moveDir);
         
     }
@@ -513,23 +511,19 @@ int Movers::determineFollowDirection(double x, double y, int &otherDir, bool &tw
     }
 }
 
-int Citizen::reverseDirection(int dir, int &dirSub)
+int Citizen::reverseDirection(int dir)
 {
     switch (dir) {
         case up:
-            dirSub = 1;
             return down;
             break;
         case down:
-            dirSub = 0;
             return up;
             break;
         case left:
-            dirSub = 3;
             return right;
             break;
         case right:
-            dirSub = 2;
             return left;
             break;
     }
