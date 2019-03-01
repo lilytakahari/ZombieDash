@@ -141,7 +141,12 @@ int StudentWorld::move()
     ostringstream gameStatus;
     gameStatus << "Score: ";
     gameStatus.fill('0');
-    gameStatus << setw(6) << getScore();
+    int score = getScore();
+    if (score < 0) {
+        score = abs(score);
+        gameStatus << "-";
+    }
+    gameStatus << setw(6) << score;
     gameStatus << "  Level: " << getLevel();
     gameStatus << "  Lives: " << getLives();
     gameStatus << "  Vaccines: " << m_player->getvacc();
