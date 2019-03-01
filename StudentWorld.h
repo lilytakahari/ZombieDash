@@ -27,24 +27,24 @@ public:
     void nowPassed() {
         m_passed = true;
     }
-    bool determineOverlap(double x, double y, const Actor* act2) const;
-    bool determineBlocking(double x, double y, const Actor* other) const;
     bool canMove(const Actor* requester, double x, double y) const;
     bool citizenEscapes(const Actor* exit);
-    bool overlapPenelope(const Actor* requester);
-    bool overlapMover(const Actor* requester);
-    bool overlapAny(double x, double y);
+    bool overlapPenelope(const Actor* requester) const;
+    bool overlapMover(const Actor* requester) const;
+    bool overlapAny(double x, double y) const;
     void awardGoodie(char type);
     void infectActors(const Actor* requester);
     void killActors(const Actor* requester);
     bool createActorAt(char type, double x, double y, int dir);
-    bool detectVomitTarget(double x, double y);
-    bool findNearestHuman(Actor* requester, double& otherX, double& otherY, double& distance);
-    bool findNearestZombie(double x, double y, double& otherX, double& otherY, double& distance);
-    bool distanceToPenelope(Actor* requester, double& otherX, double& otherY, double& distance);
+    bool detectVomitTarget(double x, double y) const;
+    bool findNearestHuman(Actor* requester, double& otherX, double& otherY, double& distance) const;
+    bool findNearestZombie(double x, double y, double& otherX, double& otherY, double& distance) const;
+    bool distanceToPenelope(Actor* requester, double& otherX, double& otherY, double& distance) const;
     
 private:
-    double calculateDistance(double x1, double y1, double x2, double y2);
+    double calculateDistance(double x1, double y1, double x2, double y2) const;
+    bool determineOverlap(double x, double y, const Actor* act2) const;
+    bool determineBlocking(double x, double y, const Actor* other) const;
     std::list<Actor*> m_actors;
     Penelope* m_player;
     

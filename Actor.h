@@ -117,6 +117,7 @@ class Penelope: public Human
 public:
     Penelope(StudentWorld *world, double startX, double startY);
     virtual void doSomething();
+    virtual bool getKilled();
     int getlm() const {
         return m_landmines;
     }
@@ -127,11 +128,26 @@ public:
         return m_vaccines;
     }
     void awardGoodie(char type);
-    virtual bool getKilled();
 private:
     int m_landmines;
     int m_flames;
     int m_vaccines;
+};
+
+class Citizen: public Human
+{
+public:
+    Citizen(StudentWorld* world, double startX, double startY)
+    : Human(world, IID_CITIZEN, startX, startY, right, 0)
+    {
+        m_skipMove = false;
+    }
+    virtual void doSomething();
+    virtual bool getKilled();
+private:
+    int reverseDirection(int dir);
+    bool m_skipMove;
+    bool moveInDir(int dir);
 };
 
 class Wall: public Actor
@@ -168,6 +184,7 @@ public:
     : Actor(world, 1, IID_EXIT, startX, startY, right, 1)
     {}
     virtual void doSomething();
+    
     virtual bool canBlock() const {
         return true;
     }
@@ -195,6 +212,8 @@ public:
     : Actor(world, 1, imageID, startX, startY,
                    right, 1)
     {}
+    virtual void doSomething();
+    
     virtual bool canBlock() const {
         return false;
     }
@@ -207,7 +226,6 @@ public:
     virtual bool notZombie() const {
         return true;
     }
-    virtual void doSomething();
     virtual bool getInfected() {
         return false;
     }
@@ -258,6 +276,7 @@ public:
            startDirection, 0)
     {}
     virtual void doSomething();
+    
     virtual bool getInfected() {
         return false;
     }
@@ -302,6 +321,21 @@ private:
     virtual void damage();
 };
 
+class Pit: public Dmgers
+{
+public:
+    Pit(StudentWorld *world, double startX, double startY)
+    : Dmgers(world, IID_PIT, startX, startY, right)
+    {}
+    virtual void doSomething() {
+        if (!stillAlive())
+            return;
+        damage();
+    }
+private:
+    virtual void damage();
+};
+
 class Zombie: public Movers
 {
 public:
@@ -312,13 +346,14 @@ public:
         m_skipMove = false;
     }
     virtual void doSomething();
+    virtual bool getKilled();
+    
     virtual bool notZombie() const {
         return false;
     }
     virtual bool getInfected() {
         return false;
     }
-    virtual bool getKilled();
 protected:
     int randDir();
     void computeThrowLoc(int dir, double& x, double& y);
@@ -353,21 +388,6 @@ private:
     virtual int determineDirection();
 };
 
-class Pit: public Dmgers
-{
-public:
-    Pit(StudentWorld *world, double startX, double startY)
-    : Dmgers(world, IID_PIT, startX, startY, right)
-    {}
-    virtual void doSomething() {
-        if (!stillAlive())
-            return;
-        damage();
-    }
-private:
-    virtual void damage();
-};
-
 class Landmine: public Actor
 {
 public:
@@ -377,6 +397,7 @@ public:
         m_safety = 30;
     }
     virtual void doSomething();
+    virtual bool getKilled();
     
     virtual bool canBlock() const {
         return false;
@@ -393,25 +414,8 @@ public:
     virtual bool getInfected() {
         return false;
     }
-    virtual bool getKilled();
 private:
     void explode();
     int m_safety;
-};
-
-class Citizen: public Human
-{
-public:
-    Citizen(StudentWorld* world, double startX, double startY)
-    : Human(world, IID_CITIZEN, startX, startY, right, 0)
-    {
-        m_skipMove = false;
-    }
-    virtual void doSomething();
-    virtual bool getKilled();
-private:
-    int reverseDirection(int dir);
-    bool m_skipMove;
-    bool moveInDir(int dir);
 };
 #endif // ACTOR_H_

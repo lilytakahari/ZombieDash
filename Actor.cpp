@@ -140,7 +140,7 @@ void Exit::doSomething()
         myWorld->increaseScore(500);
         myWorld->playSound(SOUND_CITIZEN_SAVED);
     }
-    if (myWorld->overlapPenelope(this) && myWorld->allEscaped())
+    if (myWorld->allEscaped() && myWorld->overlapPenelope(this))
         myWorld->nowPassed();
 }
 

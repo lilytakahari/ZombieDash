@@ -48,7 +48,6 @@ int StudentWorld::init()
         return GWSTATUS_LEVEL_ERROR;
     else if (result == Level::load_success)
     {
-        cerr << "Successfully loaded level" << endl;
         for (double x = 0; x < LEVEL_WIDTH; x++) {
             for (double y = 0; y < LEVEL_HEIGHT; y++) {
                 Level::MazeEntry ge = lev.getContentsOf(x,y);
@@ -218,7 +217,7 @@ bool StudentWorld::citizenEscapes(const Actor* exit)
     return false;
 }
 
-bool StudentWorld::overlapPenelope(const Actor *requester)
+bool StudentWorld::overlapPenelope(const Actor *requester) const
 {
     if (determineOverlap(requester->getX(), requester->getY(), m_player))
         return true;
@@ -260,25 +259,14 @@ void StudentWorld::killActors(const Actor* requester)
 
 bool StudentWorld::createActorAt(char type, double x, double y, int dir)
 {
-    if (type == 'v' || type == 'f')
+    if (type == 'f')
     {
         for (list<Actor*>::const_iterator it = m_actors.begin(); it != m_actors.end(); it++)
         {
-            if (type == 'v')
+            if ((*it)->canBlock() && !(*it)->canMove() && (*it)->stillAlive())
             {
-                if (!(*it)->canMove()  && !(*it)->canBeSteppedOn() && (*it)->stillAlive())
-                {
-                    if (determineOverlap(x, y, (*it)))
-                        return false;
-                }
-            }
-            else
-            {
-                if ((*it)->canBlock() && !(*it)->canMove() && (*it)->stillAlive())
-                {
-                    if (determineOverlap(x, y, (*it)))
-                        return false;
-                }
+                if (determineOverlap(x, y, (*it)))
+                    return false;
             }
         }
     }
@@ -317,7 +305,7 @@ bool StudentWorld::createActorAt(char type, double x, double y, int dir)
         return false;
 }
 
-bool StudentWorld::detectVomitTarget(double x, double y)
+bool StudentWorld::detectVomitTarget(double x, double y) const
 {
     if (determineOverlap(x, y, m_player))
         return true;
@@ -332,7 +320,7 @@ bool StudentWorld::detectVomitTarget(double x, double y)
     return false;
 }
 
-bool StudentWorld::overlapMover(const Actor *requester)
+bool StudentWorld::overlapMover(const Actor *requester) const
 {
     for (list<Actor*>::const_iterator it = m_actors.begin(); it != m_actors.end(); it++)
     {
@@ -343,7 +331,7 @@ bool StudentWorld::overlapMover(const Actor *requester)
     return false;
 }
 
-bool StudentWorld::overlapAny(double x, double y)
+bool StudentWorld::overlapAny(double x, double y) const
 {
     if (determineOverlap(x, y, m_player))
         return true;
@@ -355,13 +343,13 @@ bool StudentWorld::overlapAny(double x, double y)
     return false;
 }
 
-double StudentWorld::calculateDistance(double x1, double y1, double x2, double y2)
+double StudentWorld::calculateDistance(double x1, double y1, double x2, double y2) const
 {
     double toRad = (x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2);
     return (sqrt(toRad));
 }
 
-bool StudentWorld::findNearestHuman(Actor* requester, double& otherX, double& otherY, double& distance)
+bool StudentWorld::findNearestHuman(Actor* requester, double& otherX, double& otherY, double& distance) const 
 {
     if (!m_player->stillAlive())
         return false;
@@ -390,7 +378,7 @@ bool StudentWorld::findNearestHuman(Actor* requester, double& otherX, double& ot
 }
 
 bool StudentWorld::findNearestZombie(double x, double y, double &otherX,
-                                     double &otherY, double &distance)
+                                     double &otherY, double &distance) const
 
 {
     double compX = -1;
@@ -412,10 +400,12 @@ bool StudentWorld::findNearestZombie(double x, double y, double &otherX,
     otherX = compX;
     otherY = compY;
     distance = compDist;
+    if (otherX == -1)
+        return false;
     return true;
 }
 
-bool StudentWorld::distanceToPenelope(Actor* requester, double& otherX, double& otherY, double& distance)
+bool StudentWorld::distanceToPenelope(Actor* requester, double& otherX, double& otherY, double& distance) const
 {
     if (!m_player->stillAlive())
         return false;
