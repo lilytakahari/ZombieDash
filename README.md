@@ -1,11 +1,11 @@
 ## UCLA CS 32 Winter 2019 Project 3 - Zombie Dash
 
-Play as Penelope Dolittle and maneuver through an abandoned building, annihilating zombies and saving helpless citizens along the way. This is my implementation of what was required in the spec; I cannot say whether it is free of bugs.
+Play as Penelope Dolittle and maneuver through an abandoned building, annihilating zombies and saving helpless citizens along the way. My implementation of what was required in the spec is contained in the `Actor.h, Actor.cpp, StudentWorld.h`, and `StudentWorld.cpp` files; I cannot say whether my implementation is free of bugs.
 
 ### How to Play
 
 #### Installation
-Download the appropriate skeleton `.zip` file. Switch out the `Actor.h, Actor.cpp, StudentWorld.h`, and `StudentWorld.cpp` files with the ones above. Compile and build the files in your IDE. You may also need to download other software depending on your operating system:
+Download the appropriate skeleton `.zip` file for your operating system. Switch out the `Actor.h, Actor.cpp, StudentWorld.h`, and `StudentWorld.cpp` files with the ones above. Compile and build the files in your IDE. You may also need to download other software depending on your operating system:
 
 - **macOS:** You'll need to have XQuartz and freeGLUT installed to run the program.
     - Install XQuartz from xquartz.org:
