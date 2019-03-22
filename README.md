@@ -5,7 +5,7 @@ Play as Penelope Dolittle and maneuver through an abandoned building, annihilati
 ### How to Play
 
 #### Installation
-Download the appropriate skeleton `.zip` file for your operating system. Switch out the `Actor.h, Actor.cpp, StudentWorld.h`, and `StudentWorld.cpp` files with the ones above. Compile and build the files in your IDE. You may also need to download other software depending on your operating system:
+Download the appropriate skeleton `.zip` file for your operating system. Switch out the `Actor.h, Actor.cpp, StudentWorld.h`, and `StudentWorld.cpp` files with the ones above. Compile and build the files and run the resulting executable. You may also need to download other software depending on your operating system:
 
 - **macOS:** You'll need to have XQuartz and freeGLUT installed to run the program.
     - Install XQuartz from xquartz.org:
