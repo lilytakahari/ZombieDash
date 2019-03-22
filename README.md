@@ -1,4 +1,4 @@
-## Winter 2019 UCLA CS 32 Project 3 - Zombie Dash
+## UCLA CS 32 Winter 2019 Project 3 - Zombie Dash
 
 Play as Penelope Dolittle and maneuver through an abandoned building, annihilating zombies and saving helpless citizens along the way. This is my implementation of what was required in the spec; I cannot say whether it is free of bugs.
 
