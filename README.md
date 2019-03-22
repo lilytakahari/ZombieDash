@@ -46,3 +46,4 @@ q                          quit
 +2000                      smart zombie dies
 -1000                      citizen becomes zombie or dies
 ```
+![alt text](http://https://media.giphy.com/media/ZgUU8crD8xj76iCVPK/giphy.gif)
