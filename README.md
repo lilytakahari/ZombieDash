@@ -1,6 +1,8 @@
 ## UCLA CS 32 Winter 2019 Project 3 - Zombie Dash
 
-Play as Penelope Dolittle and maneuver through an abandoned building, annihilating zombies and saving helpless citizens along the way. My implementation of what was required in the spec is contained in the `Actor.h, Actor.cpp, StudentWorld.h`, and `StudentWorld.cpp` files; I cannot say for sure whether or not my implementation is free of bugs.
+```Correctness score: 90/90```
+
+Play as Penelope Dolittle and maneuver through an abandoned building, annihilating zombies and saving helpless citizens along the way. My implementation of what was required in the spec is contained in the `Actor.h, Actor.cpp, StudentWorld.h`, and `StudentWorld.cpp` files.
 
 ### How to Play
 
