@@ -130,12 +130,13 @@ int StudentWorld::move()
     }
     
     // Remove dead actors
-    for (list<Actor*>::iterator it = m_actors.begin(); it != m_actors.end(); it++)
+    for (list<Actor*>::iterator it = m_actors.begin(); it != m_actors.end(); )
     {
         if (!(*it)->stillAlive()) {
             delete (*it);
-            m_actors.erase(it);
-        }
+            it = m_actors.erase(it);
+        } else
+	    it++;
     }
     // Update game status line
     ostringstream gameStatus;
@@ -161,10 +162,10 @@ int StudentWorld::move()
 void StudentWorld::cleanUp()
 {
     delete m_player;
-    for (list<Actor*>::iterator it = m_actors.begin(); it != m_actors.end(); it++)
+    for (list<Actor*>::iterator it = m_actors.begin(); it != m_actors.end(); )
     {
         delete (*it);
-        m_actors.erase(it);
+        it = m_actors.erase(it);
     }
     m_pplLeft = 0;
     m_passed = false;
