@@ -16,8 +16,6 @@ GameWorld* createStudentWorld(string assetPath)
 	return new StudentWorld(assetPath);
 }
 
-// Students:  Add code to this file, StudentWorld.h, Actor.h and Actor.cpp
-
 StudentWorld::StudentWorld(string assetPath)
 : GameWorld(assetPath)
 {
@@ -31,8 +29,12 @@ StudentWorld::~StudentWorld()
     cleanUp();
 }
 
+// init:
+// 1. Load Level data
+// 2. Based on the Level data, initialize actors
 int StudentWorld::init()
 {
+    // 1
     Level lev(assetPath());
     ostringstream fileName;
     fileName << "level";
@@ -46,6 +48,8 @@ int StudentWorld::init()
         return GWSTATUS_PLAYER_WON;
     else if (result == Level::load_fail_bad_format)
         return GWSTATUS_LEVEL_ERROR;
+	
+    // 2
     else if (result == Level::load_success)
     {
         for (double x = 0; x < LEVEL_WIDTH; x++) {
@@ -98,6 +102,10 @@ int StudentWorld::init()
         return GWSTATUS_CONTINUE_GAME;
 }
 
+// move:
+// 1. Prompt actors to do something
+// 2. Remove dead actors
+// 3. Update game status line
 int StudentWorld::move()
 {
     if (m_player->stillAlive())
@@ -112,7 +120,7 @@ int StudentWorld::move()
         return GWSTATUS_PLAYER_DIED;
     }
     
-    // Prompt actors to do something.
+    // 1. Prompt actors to do something
     for (list<Actor*>::iterator it = m_actors.begin(); it != m_actors.end(); it++)
     {
         if ((*it)->stillAlive()) {
@@ -129,7 +137,7 @@ int StudentWorld::move()
         }
     }
     
-    // Remove dead actors
+    // 2. Remove dead actors
     for (list<Actor*>::iterator it = m_actors.begin(); it != m_actors.end(); )
     {
         if (!(*it)->stillAlive()) {
@@ -138,7 +146,7 @@ int StudentWorld::move()
         } else
 	    it++;
     }
-    // Update game status line
+    // 3. Update game status line
     ostringstream gameStatus;
     gameStatus << "Score: ";
     gameStatus.fill('0');
@@ -159,9 +167,11 @@ int StudentWorld::move()
     return GWSTATUS_CONTINUE_GAME;
 }
 
+// cleanUp: delete all actors
 void StudentWorld::cleanUp()
 {
     delete m_player;
+    m_player = nullptr;	
     for (list<Actor*>::iterator it = m_actors.begin(); it != m_actors.end(); )
     {
         delete (*it);
@@ -169,9 +179,9 @@ void StudentWorld::cleanUp()
     }
     m_pplLeft = 0;
     m_passed = false;
-    m_player = nullptr;
 }
 
+// determineOveralap: true if the passed in actor and the x and y overlap
 bool StudentWorld::determineOverlap(double x, double y, const Actor* act2) const
 {
     double centX1 = x + (SPRITE_WIDTH/2);
@@ -181,6 +191,8 @@ bool StudentWorld::determineOverlap(double x, double y, const Actor* act2) const
     
     return (((centX1 - centX2)*(centX1 - centX2) + (centY1 - centY2)*(centY1 - centY2)) <= 100);
 }
+
+// determineBlocking: true if the passed in actor and the x and y are blocked
 bool StudentWorld::determineBlocking(double x, double y, const Actor* other) const
 {
     if (x < (other->getX() + SPRITE_WIDTH) &&
@@ -191,6 +203,8 @@ bool StudentWorld::determineBlocking(double x, double y, const Actor* other) con
     }
     return false;
 }
+
+// canMove: true if the requester actor can move to (x, y)
 bool StudentWorld::canMove(const Actor* requester, double x, double y) const
 {
     if (m_player != requester && determineBlocking(x, y, m_player))
@@ -207,6 +221,7 @@ bool StudentWorld::canMove(const Actor* requester, double x, double y) const
     return true;
 }
 
+// citizenEscapes: true if any citizen overlaps with the exit
 bool StudentWorld::citizenEscapes(const Actor* exit)
 {
     for (list<Actor*>::const_iterator it = m_actors.begin(); it != m_actors.end(); it++)
@@ -223,6 +238,7 @@ bool StudentWorld::citizenEscapes(const Actor* exit)
     return false;
 }
 
+// overlapPenelope: true if the requester overlaps with Penelope
 bool StudentWorld::overlapPenelope(const Actor *requester) const
 {
     if (determineOverlap(requester->getX(), requester->getY(), m_player))
@@ -230,11 +246,14 @@ bool StudentWorld::overlapPenelope(const Actor *requester) const
     return false;
 }
 
+// awardGoodie: tells the player to award the goodie
 void StudentWorld::awardGoodie(char type)
 {
     m_player->awardGoodie(type);
 }
 
+// infectActors: if any actor that can get infected overlaps with
+// 		 the requester, that actor gets infected
 void StudentWorld::infectActors(const Actor* requester)
 {
     if (overlapPenelope(requester))
@@ -249,6 +268,9 @@ void StudentWorld::infectActors(const Actor* requester)
         }
     }
 }
+
+// killActors: if any actor that can get killed overlaps with
+// 		 the requester, that actor gets killed
 void StudentWorld::killActors(const Actor* requester)
 {
     if (overlapPenelope(requester))
@@ -263,6 +285,7 @@ void StudentWorld::killActors(const Actor* requester)
     }
 }
 
+// createActorAt: creates the requested actor type at (x, y) facing dir
 bool StudentWorld::createActorAt(char type, double x, double y, int dir)
 {
     if (type == 'f')
@@ -311,6 +334,7 @@ bool StudentWorld::createActorAt(char type, double x, double y, int dir)
         return false;
 }
 
+// detectVomitTarget: true if there is a vomit target at (x,y)
 bool StudentWorld::detectVomitTarget(double x, double y) const
 {
     if (determineOverlap(x, y, m_player))
@@ -326,6 +350,7 @@ bool StudentWorld::detectVomitTarget(double x, double y) const
     return false;
 }
 
+// overlapMover: true if the requester overlaps with a moving actor
 bool StudentWorld::overlapMover(const Actor *requester) const
 {
     for (list<Actor*>::const_iterator it = m_actors.begin(); it != m_actors.end(); it++)
@@ -337,6 +362,7 @@ bool StudentWorld::overlapMover(const Actor *requester) const
     return false;
 }
 
+// overlapAny: true if the requester overlaps any actor
 bool StudentWorld::overlapAny(double x, double y) const
 {
     if (determineOverlap(x, y, m_player))
@@ -349,12 +375,15 @@ bool StudentWorld::overlapAny(double x, double y) const
     return false;
 }
 
+// calculateDistance: returns the Euclidean distance betwen the two coords
 double StudentWorld::calculateDistance(double x1, double y1, double x2, double y2) const
 {
     double toRad = (x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2);
     return (sqrt(toRad));
 }
 
+// findNearestHuman: sets otherX and otherY to the coord of the closest human
+// 		     to the requester, distance to the distance to that human
 bool StudentWorld::findNearestHuman(Actor* requester, double& otherX, double& otherY, double& distance) const 
 {
     if (!m_player->stillAlive())
@@ -383,6 +412,8 @@ bool StudentWorld::findNearestHuman(Actor* requester, double& otherX, double& ot
     return true;
 }
 
+// findNearestZombie: sets otherX and otherY to the coord of the closest zombie
+// 		      to the requester, distance to the distance to that zombie
 bool StudentWorld::findNearestZombie(double x, double y, double &otherX,
                                      double &otherY, double &distance) const
 
@@ -411,6 +442,7 @@ bool StudentWorld::findNearestZombie(double x, double y, double &otherX,
     return true;
 }
 
+// distanceToPenelope: sets otherX, otherY, distance to coord of and distance to Penelope
 bool StudentWorld::distanceToPenelope(Actor* requester, double& otherX, double& otherY, double& distance) const
 {
     if (!m_player->stillAlive())
