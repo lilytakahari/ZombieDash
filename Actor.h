@@ -205,6 +205,37 @@ public:
     }
 };
 
+class Landmine: public Actor
+{
+public:
+    Landmine(StudentWorld* world, double startX, double startY)
+    : Actor(world, 1, IID_LANDMINE, startX, startY, right, 1)
+    {
+        m_safety = 30;
+    }
+    virtual void doSomething();
+    virtual bool getKilled();
+    
+    virtual bool canBlock() const {
+        return false;
+    }
+    virtual bool canBeSteppedOn() const {
+        return true;
+    }
+    virtual bool canMove() const {
+        return false;
+    }
+    virtual bool notZombie() const {
+        return true;
+    }
+    virtual bool getInfected() {
+        return false;
+    }
+private:
+    void explode();
+    int m_safety;
+};
+
 class Goodie: public Actor
 {
 public:
@@ -388,34 +419,4 @@ private:
     virtual int determineDirection();
 };
 
-class Landmine: public Actor
-{
-public:
-    Landmine(StudentWorld* world, double startX, double startY)
-    : Actor(world, 1, IID_LANDMINE, startX, startY, right, 1)
-    {
-        m_safety = 30;
-    }
-    virtual void doSomething();
-    virtual bool getKilled();
-    
-    virtual bool canBlock() const {
-        return false;
-    }
-    virtual bool canBeSteppedOn() const {
-        return true;
-    }
-    virtual bool canMove() const {
-        return false;
-    }
-    virtual bool notZombie() const {
-        return true;
-    }
-    virtual bool getInfected() {
-        return false;
-    }
-private:
-    void explode();
-    int m_safety;
-};
 #endif // ACTOR_H_
