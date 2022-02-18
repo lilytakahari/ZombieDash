@@ -181,7 +181,7 @@ void StudentWorld::cleanUp()
     m_passed = false;
 }
 
-// determineOveralap: true if the passed in actor and the x and y overlap
+// determineOverlap: true if the passed in actor and the x and y overlap
 bool StudentWorld::determineOverlap(double x, double y, const Actor* act2) const
 {
     double centX1 = x + (SPRITE_WIDTH/2);
